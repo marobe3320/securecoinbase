@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.a1f62b9a.css",
-    "main.js": "/static/js/main.213ba80b.js",
+    "main.js": "/static/js/main.4c546915.js",
     "static/js/377.b33aecdb.chunk.js": "/static/js/377.b33aecdb.chunk.js",
     "static/media/Yahoo_Sans-ExtraLight.eot": "/static/media/Yahoo_Sans-ExtraLight.7fc5f12d61a791126460.eot",
     "static/media/Yahoo_Sans-Italic.eot": "/static/media/Yahoo_Sans-Italic.e02630627ac31f793a64.eot",
@@ -80,11 +80,11 @@
     "static/media/icon-visible-active.svg": "/static/media/icon-visible-active.d5572cc2a3a17e5fc326ae4936e0e676.svg",
     "static/media/liveArrowLeft.svg": "/static/media/liveArrowLeft.43280e0ba671a1d8b5e34f1931c4fe4b.svg",
     "main.a1f62b9a.css.map": "/static/css/main.a1f62b9a.css.map",
-    "main.213ba80b.js.map": "/static/js/main.213ba80b.js.map",
+    "main.4c546915.js.map": "/static/js/main.4c546915.js.map",
     "377.b33aecdb.chunk.js.map": "/static/js/377.b33aecdb.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a1f62b9a.css",
-    "static/js/main.213ba80b.js"
+    "static/js/main.4c546915.js"
   ]
 }

